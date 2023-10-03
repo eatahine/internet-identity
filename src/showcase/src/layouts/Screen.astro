@@ -1,0 +1,15 @@
+---
+import Layout from "./Layout.astro";
+---
+
+<Layout>
+  <main
+    id="pageContent"
+    aria-live="polite"
+    data-foo={Astro.url.pathname.substring(1)}
+    data-page-name="TODO"
+  >
+  </main>
+  <div id="loaderContainer"></div>
+  <slot />
+</Layout>

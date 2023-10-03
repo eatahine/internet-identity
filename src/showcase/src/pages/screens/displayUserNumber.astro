@@ -1,0 +1,18 @@
+---
+import Screen from "../../layouts/Screen.astro";
+---
+
+<Screen>
+  <script>
+    import { registerStepper } from "$src/flows/register/stepper";
+    import { displayUserNumberPage } from "$src/flows/register/finish";
+    import { identityBackground } from "./foo";
+
+    displayUserNumberPage({
+      identityBackground,
+      userNumber: BigInt(10000),
+      onContinue: () => console.log("done"),
+      stepper: registerStepper({ current: "finish" }),
+    });
+  </script>
+</Screen>

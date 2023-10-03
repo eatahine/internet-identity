@@ -1,0 +1,19 @@
+---
+import Screen from "../../layouts/Screen.astro";
+---
+
+<Screen>
+  <script>
+    import { I18n } from "$src/utils/i18n";
+    import { toast } from "$src/components/toast";
+    import { html } from "lit-html";
+    import { promptDeviceAliasPage } from "$src/components/alias";
+
+    promptDeviceAliasPage({
+      title: "Register this device",
+      cancel: () => toast.info(html`canceled`),
+      continue: (alias) => toast.info(html`device alias: ${alias}`),
+      i18n: new I18n("en"),
+    });
+  </script>
+</Screen>

@@ -1,0 +1,21 @@
+---
+import Screen from "../../layouts/Screen.astro";
+---
+
+<Screen>
+  <script>
+    import { registerStepper } from "$src/flows/register/stepper";
+    import { displayUserNumberPage } from "$src/flows/register/finish";
+    import { identityBackground } from "./foo";
+    import { tempKeyWarningBox } from "$src/flows/manage/tempKeys";
+    import { I18n } from "$src/utils/i18n";
+
+    displayUserNumberPage({
+      identityBackground,
+      userNumber: BigInt(10000),
+      onContinue: () => console.log("done"),
+      stepper: registerStepper({ current: "finish" }),
+      marketingIntroSlot: tempKeyWarningBox({ i18n: new I18n("en") }),
+    });
+  </script>
+</Screen>

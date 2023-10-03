@@ -7,7 +7,6 @@ import {
   Timestamp,
 } from "$generated/internet_identity_types";
 import { showWarning } from "$src/banner";
-import { promptDeviceAliasPage } from "$src/components/alias";
 import { authnPages } from "$src/components/authenticateBox";
 import { displayError } from "$src/components/displayError";
 import { loadIdentityBackground } from "$src/components/identityCard";
@@ -22,7 +21,6 @@ import { verifyTentativeDevicePage } from "$src/flows/addDevice/manage/verifyTen
 import { deviceRegistrationDisabledInfoPage } from "$src/flows/addDevice/welcomeView/deviceRegistrationModeDisabled";
 import { showVerificationCodePage } from "$src/flows/addDevice/welcomeView/showVerificationCode";
 import { authnTemplateAuthorize } from "$src/flows/authorize";
-import { compatibilityNotice } from "$src/flows/compatibilityNotice";
 import { dappsExplorerPage } from "$src/flows/dappsExplorer";
 import { getDapps } from "$src/flows/dappsExplorer/dapps";
 import { authnTemplateManage, displayManagePage } from "$src/flows/manage";
@@ -31,7 +29,6 @@ import {
   resetPhraseInfoPage,
   unprotectDeviceInfoPage,
 } from "$src/flows/manage/deviceSettings";
-import { tempKeyWarningBox } from "$src/flows/manage/tempKeys";
 import { confirmPinPage } from "$src/flows/pin/confirmPin";
 import { pinInfoPage } from "$src/flows/pin/pinInfo";
 import { setPinPage } from "$src/flows/pin/setPin";
@@ -47,7 +44,6 @@ import { recoverWithDevicePage } from "$src/flows/recovery/recoverWith/device";
 import { recoverWithPhrasePage } from "$src/flows/recovery/recoverWith/phrase";
 import { addPhrasePage } from "$src/flows/recovery/recoveryWizard";
 import { promptCaptchaPage } from "$src/flows/register/captcha";
-import { displayUserNumberPage } from "$src/flows/register/finish";
 import { savePasskeyPage } from "$src/flows/register/passkey";
 import { registerStepper } from "$src/flows/register/stepper";
 import { registerDisabled } from "$src/flows/registerDisabled";
@@ -143,6 +139,7 @@ export const manageTemplates = authnTemplateManage({ dapps });
 const manage = authnPages(i18n, { ...authnCnfg, ...manageTemplates });
 
 export const iiPages: Record<string, () => void> = {
+  /*
   displayUserNumber: () =>
     displayUserNumberPage({
       identityBackground,
@@ -166,6 +163,7 @@ export const iiPages: Record<string, () => void> = {
       continue: (alias) => console.log("device alias:", alias),
       i18n,
     }),
+    */
 
   // Authorize screens
 
