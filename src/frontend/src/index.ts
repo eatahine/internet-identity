@@ -6,6 +6,7 @@ import { registerTentativeDevice } from "./flows/addDevice/welcomeView/registerT
 import { authFlowAuthorize } from "./flows/authorize";
 import { compatibilityNotice } from "./flows/compatibilityNotice";
 import { authFlowManage, renderManageWarmup } from "./flows/manage";
+import { vcFlow } from "./flows/verifiableCredentials";
 import "./styles/main.css";
 import { getAddDeviceAnchor } from "./utils/addDeviceLink";
 import { checkRequiredFeatures } from "./utils/featureDetection";
@@ -91,6 +92,11 @@ const init = async () => {
   if (window.location.pathname === "/faq") {
     const faqUrl = "https://identitysupport.dfinity.org/hc/en-us";
     window.location.replace(faqUrl);
+  }
+
+  // Check for VC flow
+  if (window.location.pathname === "/vc-flow") {
+    return vcFlow();
   }
 
   const okOrReason = await checkRequiredFeatures(url);

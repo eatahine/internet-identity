@@ -1,0 +1,47 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+  <main id="pageContent" aria-live="polite"></main>
+
+  <script>
+    import { html } from "lit-html";
+    import { nonNullish } from "@dfinity/utils";
+    import { renderPage } from "$src/utils/lit-html";
+    import { isNullish } from "@dfinity/utils";
+    import { Chan } from "$src/utils/utils";
+    import { asyncReplace } from "lit-html/directives/async-replace.js";
+    import { toast } from "$src/components/toast";
+
+    const template = () => {
+      const nextId = new Chan<number>(0);
+      return html`
+        <div class="l-wrap">
+          <hgroup>
+            <h1 class="t-title">Hello</h1>
+          </hgroup>
+          <button
+            class="c-button"
+            @click=${() => {
+              const iiWindow = window.open("http://localhost:5173/vc-flow");
+              if (isNullish(iiWindow)) {
+                toast.error("Could not open window");
+                return;
+              }
+
+              const flowId = nextId.latest;
+              nextId.send(flowId + 1);
+            }}
+          >
+            Start new flow (ID: ${asyncReplace(nextId)})
+          </button>
+        </div>
+      `;
+    };
+
+    const page = renderPage(template);
+
+    page(undefined);
+  </script>
+</Layout>
