@@ -505,7 +505,7 @@ mod v2_api {
     use super::*;
 
     #[query]
-    #[candid_method]
+    #[candid_method(query)]
     fn identity_authn_info(identity_number: IdentityNumber) -> Option<IdentityAuthnInfoResponse> {
         let anchor =
             state::storage_borrow(|storage| storage.read(identity_number).unwrap_or_default());
