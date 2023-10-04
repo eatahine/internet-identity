@@ -115,6 +115,11 @@ export interface IdentityAnchorInfo {
   'devices' : Array<DeviceWithUsage>,
   'device_registration' : [] | [DeviceRegistrationInfo],
 }
+export interface IdentityAuthnInfo {
+  'authn_methods' : Array<AuthnMethod>,
+  'recovery_authn_methods' : Array<AuthnMethod>,
+}
+export type IdentityAuthnInfoResponse = { 'ok' : IdentityAuthnInfo };
 export interface IdentityInfo {
   'authn_methods' : Array<AuthnMethodData>,
   'metadata' : MetadataMap,
@@ -223,6 +228,10 @@ export interface _SERVICE {
   'get_principal' : ActorMethod<[UserNumber, FrontendHostname], Principal>,
   'http_request' : ActorMethod<[HttpRequest], HttpResponse>,
   'http_request_update' : ActorMethod<[HttpRequest], HttpResponse>,
+  'identity_authn_info' : ActorMethod<
+    [IdentityNumber],
+    [] | [IdentityAuthnInfoResponse]
+  >,
   'identity_info' : ActorMethod<[IdentityNumber], [] | [IdentityInfoResponse]>,
   'identity_metadata_replace' : ActorMethod<
     [IdentityNumber, MetadataMap],

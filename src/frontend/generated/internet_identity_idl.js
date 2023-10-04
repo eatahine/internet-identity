@@ -183,6 +183,11 @@ export const idlFactory = ({ IDL }) => {
     'streaming_strategy' : IDL.Opt(StreamingStrategy),
     'status_code' : IDL.Nat16,
   });
+  const IdentityAuthnInfo = IDL.Record({
+    'authn_methods' : IDL.Vec(AuthnMethod),
+    'recovery_authn_methods' : IDL.Vec(AuthnMethod),
+  });
+  const IdentityAuthnInfoResponse = IDL.Variant({ 'ok' : IdentityAuthnInfo });
   const AuthnMethodRegistrationInfo = IDL.Record({
     'expiration' : Timestamp,
     'authn_method' : IDL.Opt(AuthnMethodData),
@@ -264,6 +269,11 @@ export const idlFactory = ({ IDL }) => {
       ),
     'http_request' : IDL.Func([HttpRequest], [HttpResponse], ['query']),
     'http_request_update' : IDL.Func([HttpRequest], [HttpResponse], []),
+    'identity_authn_info' : IDL.Func(
+        [IdentityNumber],
+        [IDL.Opt(IdentityAuthnInfoResponse)],
+        ['query'],
+      ),
     'identity_info' : IDL.Func(
         [IdentityNumber],
         [IDL.Opt(IdentityInfoResponse)],
