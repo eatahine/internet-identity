@@ -350,11 +350,20 @@ type AuthnMethodRegistrationInfo = record {
     expiration: Timestamp;
 };
 
+type IdentityAuthnInfo = record {
+    authn_methods: vec AuthnMethod;
+    recovery_authn_methods: vec AuthnMethod;
+};
+
 type IdentityInfo = record {
     authn_methods: vec AuthnMethodData;
     authn_method_registration: opt AuthnMethodRegistrationInfo;
     // Authentication method independent metadata
     metadata: MetadataMap;
+};
+
+type IdentityAuthnInfoResponse = variant {
+    ok: IdentityAuthnInfo;
 };
 
 type IdentityInfoResponse = variant {
@@ -417,6 +426,9 @@ service : (opt InternetIdentityInit) -> {
     // with future variant extensions.
     // A client decoding a response as `null` indicates outdated type information
     // and should be treated as an error.
+
+    // Returns information about the authentication methods of the identity with the given number.
+    identity_authn_info: (IdentityNumber) -> (opt IdentityAuthnInfoResponse) query;
 
     // Returns information about the identity with the given number.
     // Requires authentication.
