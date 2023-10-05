@@ -4,12 +4,19 @@ import { getDapps } from "$src/flows/dappsExplorer/dapps";
 import { authnTemplateManage } from "$src/flows/manage";
 import { I18n } from "$src/i18n";
 import { Connection } from "$src/utils/iiConnection";
-import { vcProtocol } from "./postMessageInterface";
-import { prompt } from "./prompt";
+import { Principal } from "@dfinity/principal";
 import { allow } from "./allow";
+import { vcProtocol } from "./postMessageInterface";
 
 const dapps = getDapps();
 const someDapp = dapps.find((dapp) => dapp.name === "NNS Dapp")!;
+
+const giveUp = async (message?: string): Promise<never> => {
+  console.error("Nope " + message);
+  return await new Promise((_) => {
+    /* halt */
+  });
+};
 
 export const vcFlow = async ({ connection }: { connection: Connection }) => {
   const _result = await vcProtocol({
@@ -27,34 +34,42 @@ export const vcFlow = async ({ connection }: { connection: Connection }) => {
       }
       x satisfies never;
     },
-    verifyCredentials: async (request) => {
+    verifyCredentials: async ({ request, rpOrigin }) => {
       // Go through the login flow, potentially creating an anchor.
-      const {
-        userNumber,
-        connection: authenticatedConnection,
-        newAnchor,
-      } = await authenticateBox({
+      const { connection: authenticatedConnection } = await authenticateBox({
         connection,
         i18n: new I18n(),
         templates: authnTemplateManage({ dapps }),
       });
-      const allowed = await allow({
-          relying: someDapp,
-          provider: someDapp,
-      });
-      if(allowed === "canceled") {
-          console.error("Nope");
-            return await new Promise((_) => {
-              /* halt */
-            });
 
+      const { hostname: rpHostname } = new URL(rpOrigin);
+      const computedP_RP = await authenticatedConnection.getPrincipal({
+        hostname: rpHostname,
+      });
+
+      const givenP_RP = Principal.fromText(request.params.credentialSubject);
+      // TODO: do some proper principal checking
+      if (computedP_RP.toString() !== givenP_RP.toString()) {
+        return giveUp(
+          [
+            "bad principals",
+            computedP_RP.toString(),
+            givenP_RP.toString(),
+          ].join(", ")
+        );
       }
-      allowed satisfies "allowed"
+
+      const allowed = await allow({
+        relying: someDapp,
+        provider: someDapp,
+      });
+      if (allowed === "canceled") {
+        return giveUp("canceled");
+      }
+      allowed satisfies "allowed";
 
       return {
-        id: "1",
-        jsonrpc: "2.0",
-        result: { verifiablePresentation: "hello" },
+        verifiablePresentation: "hello",
       };
     },
   });

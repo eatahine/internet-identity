@@ -469,6 +469,15 @@ export class AuthenticatedConnection extends Connection {
     return await actor.get_anchor_info(this.userNumber);
   };
 
+  getPrincipal = async ({
+    hostname,
+  }: {
+    hostname: string;
+  }): Promise<Principal> => {
+    const actor = await this.getActor();
+    return await actor.get_principal(this.userNumber, hostname);
+  };
+
   enterDeviceRegistrationMode = async (): Promise<Timestamp> => {
     const actor = await this.getActor();
     return await actor.enter_device_registration_mode(this.userNumber);

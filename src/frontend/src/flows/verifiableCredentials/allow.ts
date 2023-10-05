@@ -22,12 +22,25 @@ const allowTemplate = ({
   const slot = html`
     <hgroup ${scrollToTop ? mount(() => window.scrollTo(0, 0)) : undefined}>
       <h1 class="t-title t-title--main">Credential Access Request,</h1>
-      <p class="t-paragraph">
-        Allow sharing the following credential issued by
-        <strong class="t-strong">${provider.name}</strong> with
-        <strong class="t-strong">${relying.name}</strong>?
-      </p>
     </hgroup>
+    <p class="t-paragraph">
+      Allow sharing the following credential issued by
+      <strong class="t-strong">${provider.name}</strong> with
+      <strong class="t-strong">${relying.name}</strong>?
+    </p>
+
+    <div class="c-button-group">
+      <button
+        data-action="cancel"
+        class="c-button c-button--secondary"
+        @click="${() => onCancel()}"
+      >
+        Cancel
+      </button>
+      <button data-action="allow" class="c-button" @click="${() => onAllow()}">
+        Allow
+      </button>
+    </div>
   `;
 
   return mainWindow({

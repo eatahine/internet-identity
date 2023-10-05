@@ -24,7 +24,7 @@ export const VcFlowRequest = z.object({
 export type VcFlowRequest = z.infer<typeof VcFlowRequest>;
 
 export type VcVerifiablePresentation = {
-  id: string;
+  id: number;
   jsonrpc: "2.0";
   result: {
     verifiablePresentation: string;
@@ -36,9 +36,10 @@ export const vcProtocol = async ({
   verifyCredentials,
 }: {
   onProgress: (state: "waiting" | "verifying") => void;
-  verifyCredentials: (
-    request: VcFlowRequest
-  ) => Promise<VcVerifiablePresentation>;
+  verifyCredentials: (args: {
+    request: VcFlowRequest;
+    rpOrigin: string;
+  }) => Promise<VcVerifiablePresentation["result"]>;
 }) => {
   if (window.opener === null) {
     // If there's no `window.opener` a user has manually navigated to "/vc-flow".
@@ -54,22 +55,31 @@ export const vcProtocol = async ({
 
   onProgress("waiting");
 
-  const request = await waitForRequest();
+  const { origin, request } = await waitForRequest();
+  const reqId = request.id;
 
   onProgress("verifying");
 
-  const response = await verifyCredentials(request);
+  const result = await verifyCredentials({ request, rpOrigin: origin });
 
-  window.opener.postMessage(response satisfies VcVerifiablePresentation);
+  window.opener.postMessage(
+    {
+      id: reqId,
+      jsonrpc: "2.0",
+      result,
+    } satisfies VcVerifiablePresentation,
+    origin
+  );
 };
 
-const waitForRequest = (): Promise<VcFlowRequest> => {
-  return new Promise<VcFlowRequest>((resolve) => {
+const waitForRequest = (): Promise<{
+  request: VcFlowRequest;
+  origin: string;
+}> => {
+  return new Promise((resolve) => {
     const messageEventHandler = (evnt: MessageEvent) => {
       const message: unknown = evnt.data;
       const result = VcFlowRequest.safeParse(message);
-
-      // TODO: read origin
 
       if (!result.success) {
         const message = `Unexpected error: flow request ` + result.error;
@@ -80,7 +90,7 @@ const waitForRequest = (): Promise<VcFlowRequest> => {
 
       window.removeEventListener("message", messageEventHandler);
 
-      resolve(result.data);
+      resolve({ request: result.data, origin: evnt.origin });
     };
 
     // Set up an event listener for receiving messages from the client.
