@@ -1,19 +1,18 @@
 import { mainWindow } from "$src/components/mainWindow";
-import { KnownDapp } from "$src/flows/dappsExplorer/dapps";
 import { mount, renderPage } from "$src/utils/lit-html";
 import { TemplateResult, html } from "lit-html";
 
 /* Anchor construction component (for creating WebAuthn credentials) */
 
 const allowTemplate = ({
-  relying,
-  provider,
+  relyingOrigin,
+  providerOrigin,
   onAllow,
   onCancel,
   scrollToTop = false,
 }: {
-  relying: KnownDapp;
-  provider: KnownDapp;
+  relyingOrigin: string;
+  providerOrigin: string;
   onAllow: () => void;
   onCancel: () => void;
   /* put the page into view */
@@ -25,8 +24,8 @@ const allowTemplate = ({
     </hgroup>
     <p class="t-paragraph">
       Allow sharing the following credential issued by
-      <strong class="t-strong">${provider.name}</strong> with
-      <strong class="t-strong">${relying.name}</strong>?
+      <strong class="t-strong">${providerOrigin}</strong> with
+      <strong class="t-strong">${relyingOrigin}</strong>?
     </p>
 
     <div class="c-button-group">
@@ -54,16 +53,16 @@ export const allowPage = renderPage(allowTemplate);
 
 // Prompt the user to create a WebAuthn identity
 export const allow = ({
-  relying,
-  provider,
+  relyingOrigin,
+  providerOrigin,
 }: {
-  relying: KnownDapp;
-  provider: KnownDapp;
+  relyingOrigin: string;
+  providerOrigin: string;
 }): Promise<"allowed" | "canceled"> => {
   return new Promise((resolve) =>
     allowPage({
-      relying,
-      provider,
+      relyingOrigin,
+      providerOrigin,
       onAllow: () => resolve("allowed"),
       onCancel: () => resolve("canceled"),
       scrollToTop: true,

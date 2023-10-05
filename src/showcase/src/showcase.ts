@@ -647,8 +647,8 @@ export const iiPages: Record<string, () => void> = {
     }),
   vcAllow: () =>
     allowPage({
-      relying: openChat,
-      provider: nnsDapp,
+      relyingOrigin: "https://oc.app",
+      providerOrigin: "https://nns.ic0.app",
       onAllow: () => toast.info(html`Allowed`),
       onCancel: () => toast.info(html`Canceled`),
     }),

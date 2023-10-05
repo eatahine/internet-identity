@@ -1,18 +1,20 @@
+import { SignedIdAlias } from "$generated/internet_identity_types";
 import { authenticateBox } from "$src/components/authenticateBox";
 import { showSpinner } from "$src/components/spinner";
+import { toast } from "$src/components/toast";
 import { getDapps } from "$src/flows/dappsExplorer/dapps";
 import { authnTemplateManage } from "$src/flows/manage";
 import { I18n } from "$src/i18n";
-import { Connection } from "$src/utils/iiConnection";
+import { AuthenticatedConnection, Connection } from "$src/utils/iiConnection";
 import { Principal } from "@dfinity/principal";
 import { allow } from "./allow";
 import { vcProtocol } from "./postMessageInterface";
 
 const dapps = getDapps();
-const someDapp = dapps.find((dapp) => dapp.name === "NNS Dapp")!;
 
 const giveUp = async (message?: string): Promise<never> => {
   console.error("Nope " + message);
+  toast.error("Nope " + message);
   return await new Promise((_) => {
     /* halt */
   });
@@ -42,9 +44,17 @@ export const vcFlow = async ({ connection }: { connection: Connection }) => {
         templates: authnTemplateManage({ dapps }),
       });
 
+      const { issuerOrigin } = request.params.issuer;
+
       const { hostname: rpHostname } = new URL(rpOrigin);
       const computedP_RP = await authenticatedConnection.getPrincipal({
         hostname: rpHostname,
+      });
+
+      const pAliasPending = getAlias({
+        rpOrigin,
+        issuerOrigin,
+        authenticatedConnection,
       });
 
       const givenP_RP = Principal.fromText(request.params.credentialSubject);
@@ -60,17 +70,68 @@ export const vcFlow = async ({ connection }: { connection: Connection }) => {
       }
 
       const allowed = await allow({
-        relying: someDapp,
-        provider: someDapp,
+        relyingOrigin: rpOrigin,
+        providerOrigin: issuerOrigin,
       });
       if (allowed === "canceled") {
         return giveUp("canceled");
       }
       allowed satisfies "allowed";
 
+      const [_pAlias] = await Promise.all([pAliasPending]);
+
+      return giveUp("Rest of flow not implemented");
+
       return {
         verifiablePresentation: "hello",
       };
     },
   });
+};
+
+const _lookupCanister = ({
+  origin,
+}: {
+  origin: string;
+}): Promise<Principal> => {
+  return giveUp("Don't know how to lookup canister " + origin);
+};
+
+const getAlias = async ({
+  authenticatedConnection,
+  issuerOrigin,
+  rpOrigin,
+}: {
+  issuerOrigin: string;
+  rpOrigin: string;
+  authenticatedConnection: AuthenticatedConnection;
+}): Promise<{
+  rpAliasCredential: SignedIdAlias;
+  issuerAliasCredential: SignedIdAlias;
+}> => {
+  const preparedIdAlias = await authenticatedConnection.prepareIdAlias({
+    issuerOrigin,
+    rpOrigin,
+  });
+
+  if ("error" in preparedIdAlias) {
+    return giveUp("Could not prepare alias");
+  }
+
+  const result = await authenticatedConnection.getIdAlias({
+    preparedIdAlias,
+    issuerOrigin,
+    rpOrigin,
+  });
+
+  if ("error" in result) {
+    return giveUp("Could not get alias");
+  }
+
+  const {
+    rp_id_alias_credential: rpAliasCredential,
+    issuer_id_alias_credential: issuerAliasCredential,
+  } = result;
+
+  return { rpAliasCredential, issuerAliasCredential };
 };
