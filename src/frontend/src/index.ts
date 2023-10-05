@@ -94,11 +94,6 @@ const init = async () => {
     window.location.replace(faqUrl);
   }
 
-  // Check for VC flow
-  if (window.location.pathname === "/vc-flow") {
-    return vcFlow();
-  }
-
   const okOrReason = await checkRequiredFeatures(url);
   if (okOrReason !== true) {
     return compatibilityNotice(okOrReason);
@@ -106,6 +101,11 @@ const init = async () => {
 
   // Prepare the actor/connection to talk to the canister
   const connection = new Connection(readCanisterId());
+
+  // Check for VC flow
+  if (window.location.pathname === "/vc-flow") {
+    return vcFlow({ connection });
+  }
 
   // Figure out if user is trying to add a device. If so, use the anchor from the URL.
   const addDeviceAnchor = getAddDeviceAnchor();

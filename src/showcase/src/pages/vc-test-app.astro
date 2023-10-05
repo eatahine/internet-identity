@@ -7,34 +7,96 @@ import Layout from "../layouts/Layout.astro";
 
   <script>
     import { html } from "lit-html";
-    import { nonNullish } from "@dfinity/utils";
     import { renderPage } from "$src/utils/lit-html";
     import { isNullish } from "@dfinity/utils";
     import { Chan } from "$src/utils/utils";
     import { asyncReplace } from "lit-html/directives/async-replace.js";
     import { toast } from "$src/components/toast";
+    import { createRef, ref } from "lit-html/directives/ref.js";
+    import { withRef } from "$src/utils/lit-html";
+    import { VcFlowRequest } from "$src/flows/verifiableCredentials/postMessageInterface";
+
+    const inferDefaultIIURL = () => {
+      if (window.location.hostname === "localhost") {
+        return (
+          window.location.protocol + "//" + window.location.hostname + ":5173/"
+        );
+      }
+
+      return "https://identity.ic0.app/";
+    };
 
     const template = () => {
       const nextId = new Chan<number>(0);
+      const urlInput = createRef<HTMLInputElement>();
+      const ii = new Chan<
+        { win: Window; origin: string; flowId: number } | undefined
+      >(undefined);
       return html`
         <div class="l-wrap">
           <hgroup>
             <h1 class="t-title">Hello</h1>
           </hgroup>
+          <input
+          ${ref(urlInput)}
+
+        class="c-input c-input--stack c-input--fullwidth"
+        value=${inferDefaultIIURL()}
+          ></input>
           <button
             class="c-button"
             @click=${() => {
-              const iiWindow = window.open("http://localhost:5173/vc-flow");
+              const urlRaw = withRef(urlInput, (urlInput) => urlInput.value);
+              if (isNullish(urlRaw)) {
+                toast.error("Could not read URL");
+                return;
+              }
+
+              const urlParsed = new URL(urlRaw);
+              urlParsed.pathname = "vc-flow";
+
+              const iiWindow = window.open(urlParsed.toString());
               if (isNullish(iiWindow)) {
                 toast.error("Could not open window");
                 return;
               }
 
               const flowId = nextId.latest;
+              ii.send({ win: iiWindow, origin: urlParsed.toString(), flowId });
+
               nextId.send(flowId + 1);
             }}
           >
             Start new flow (ID: ${asyncReplace(nextId)})
+          </button>
+          <button
+          class="c-button"
+            ?disabled=${asyncReplace(ii.map((ii) => isNullish(ii)))}
+            @click=${asyncReplace(
+              ii.map((ii) =>
+                isNullish(ii)
+                  ? undefined
+                  : () => {
+                      ii.win.postMessage(
+                        {
+                          id: ii.flowId,
+                          jsonrpc: "2.0",
+                          method: "request_credential",
+                          params: {
+                            issuer: {
+                              issuerOrigin: "todosetme",
+                              credentialId: "someCred",
+                            },
+                            credentialSubject: "some-principal",
+                          },
+                        } satisfies VcFlowRequest,
+                        ii.origin
+                      );
+                    }
+              )
+            )}
+            >
+            Send request
           </button>
         </div>
       `;

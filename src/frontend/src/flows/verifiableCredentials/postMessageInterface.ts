@@ -46,7 +46,11 @@ export const vcProtocol = async ({
     return "orphan";
   }
 
-  window.opener.postMessage(VcFlowReady);
+  // Send a message to indicate we're ready.
+  // NOTE: Because `window.opener.origin` cannot be accessed, this message
+  // is sent with "*" as the target origin. This is safe as no sensitive
+  // information is being communicated here.
+  window.opener.postMessage(VcFlowReady, "*");
 
   onProgress("waiting");
 
@@ -64,6 +68,8 @@ const waitForRequest = (): Promise<VcFlowRequest> => {
     const messageEventHandler = (evnt: MessageEvent) => {
       const message: unknown = evnt.data;
       const result = VcFlowRequest.safeParse(message);
+
+      // TODO: read origin
 
       if (!result.success) {
         const message = `Unexpected error: flow request ` + result.error;

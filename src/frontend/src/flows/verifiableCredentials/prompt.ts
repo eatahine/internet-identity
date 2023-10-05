@@ -66,7 +66,7 @@ const promptTemplate = ({
 
 export const promptPage = renderPage(promptTemplate);
 
-// Prompt the user to create a WebAuthn identity
+// TODO: change name
 export const prompt = ({
   userNumber,
   knownDapp,

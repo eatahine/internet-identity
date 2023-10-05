@@ -58,6 +58,7 @@ import { NonEmptyArray } from "$src/utils/utils";
 import { TemplateResult, html, render } from "lit-html";
 import { asyncReplace } from "lit-html/directives/async-replace.js";
 
+import { allowPage } from "$src/flows/verifiableCredentials/allow";
 import { promptPage } from "$src/flows/verifiableCredentials/prompt";
 import { selectPage } from "$src/flows/verifiableCredentials/select";
 
@@ -643,6 +644,13 @@ export const iiPages: Record<string, () => void> = {
       userNumber: BigInt(1234),
       knownDapp: openChat,
       cancel: () => console.log("cancel"),
+    }),
+  vcAllow: () =>
+    allowPage({
+      relying: openChat,
+      provider: nnsDapp,
+      onAllow: () => toast.info(html`Allowed`),
+      onCancel: () => toast.info(html`Canceled`),
     }),
   vcSelect: () =>
     selectPage({
