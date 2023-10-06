@@ -10,6 +10,8 @@ import { Principal } from "@dfinity/principal";
 import { allow } from "./allow";
 import { vcProtocol } from "./postMessageInterface";
 
+import verifiablePresOCHack from "./precomputedOCHack.txt?raw";
+
 const dapps = getDapps();
 
 const giveUp = async (message?: string): Promise<never> => {
@@ -80,11 +82,7 @@ export const vcFlow = async ({ connection }: { connection: Connection }) => {
 
       const [_pAlias] = await Promise.all([pAliasPending]);
 
-      return giveUp("Rest of flow not implemented");
-
-      return {
-        verifiablePresentation: "hello",
-      };
+      return { verifiablePresentation: verifiablePresOCHack };
     },
   });
 };
