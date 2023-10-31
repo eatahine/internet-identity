@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { isNullish } from "@dfinity/utils";
 import { ChromeOptions } from "@wdio/types/build/Capabilities";
 import { existsSync, mkdirSync } from "fs";
 import { remote } from "webdriverio";
@@ -113,6 +114,10 @@ async function withChrome<T>(
       "goog:chromeOptions": chromeOptions,
     },
   });
+
+  if (isNullish(mobileEmulation)) {
+    await browser.setWindowSize(1200, 900);
+  }
 
   const res = await cb(browser);
   await browser.deleteSession();
